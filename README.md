@@ -170,3 +170,21 @@ Before running any attack simulations, the VM was isolated from the internet and
   * Resolved temporarily using SPL `rex` field extraction, and permanently by switching `renderXml = false` in `inputs.conf`.
 
 ![T1082 Detection in Splunk](screenshots/07_t1082_detection.png)
+
+### Detection 2: Encoded & Hidden PowerShell Execution (`T1059.001`)
+* **MITRE ATT&CK Tactic:** Execution (`T1059.001`)
+* **Data Source:** Sysmon (`Event ID 1` - Process Creation)
+* **Alert Severity:** High
+* **Simulation Command (Offline Base64 Execution):**
+  ```powershell
+  $cmd = "whoami; hostname; Get-Date"
+  $encoded = [Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($cmd))
+  powershell.exe -NoProfile -WindowStyle Hidden -EncodedCommand $encoded
+  ```
+* **Splunk SPL Query:** [View Query](detections/T1059_001_encoded_powershell.spl)
+* **Analyst Triage & Findings:**
+  * Detected `powershell.exe` launching with suspicious evasion flags (`-NoProfile`, `-WindowStyle Hidden`, `-EncodedCommand`).
+  * Extracted the Base64 payload from the `CommandLine` field and decoded it (UTF-16LE) to reveal the underlying reconnaissance commands (`whoami; hostname; Get-Date`).
+
+![T1059.001 Detection in Splunk](screenshots/08_t1059_001_detection.png)
+![Decoded Base64 Payload](screenshots/09_t1059_001_decoded.png)
