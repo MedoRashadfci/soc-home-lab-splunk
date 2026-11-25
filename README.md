@@ -150,7 +150,23 @@ Before running any attack simulations, the VM was isolated from the internet and
 
 ---
 
-## 7. Next Steps (Phase 2 — In Progress)
-- [ ] Execute MITRE ATT&CK simulations (`T1082`, `T1059.001`, `T1053`).
-- [ ] Write SPL detection rules and configure automated Splunk Alerts.
-- [ ] Build a SOC Monitoring & Investigation Dashboard.
+---
+
+## 7. Phase 2: Attack Simulations & Detection Engineering
+
+### Detection 1: System Information Discovery (`T1082`)
+* **MITRE ATT&CK Tactic:** Discovery (`T1082`)
+* **Data Source:** Sysmon (`Event ID 1` - Process Creation)
+* **Simulation Command:**
+  ```powershell
+  Invoke-AtomicTest T1082 -TestNumbers 1
+  ```
+* **Splunk SPL Query:** [View Query](detections/T1082_system_info.spl)
+* **Analyst Findings (Process Tree):**
+  * The query returned **2 events**, revealing the full execution chain: `powershell.exe` → `cmd.exe` → `systeminfo.exe`.
+  * Identifying `powershell.exe` spawning `cmd.exe` to run reconnaissance commands is a strong indicator of scripted/automated discovery rather than normal administrative usage.
+* **Troubleshooting Note (XML Parsing):**
+  * Initial queries using `EventCode=1` returned no results because `renderXml = true` ingested raw XML without the Sysmon TA installed.
+  * Resolved temporarily using SPL `rex` field extraction, and permanently by switching `renderXml = false` in `inputs.conf`.
+
+![T1082 Detection in Splunk](screenshots/07_t1082_detection.png)
