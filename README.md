@@ -188,3 +188,18 @@ Before running any attack simulations, the VM was isolated from the internet and
 
 ![T1059.001 Detection in Splunk](screenshots/08_t1059_001_detection.png)
 ![Decoded Base64 Payload](screenshots/09_t1059_001_decoded.png)
+
+### Detection 3: Scheduled Task Persistence (`T1053.005`)
+* **MITRE ATT&CK Tactic:** Persistence (`T1053.005`)
+* **Data Source:** Sysmon (`Event ID 1` - Process Creation)
+* **Alert Severity:** High
+* **Simulation & Cleanup Commands:**
+  ```powershell
+  Invoke-AtomicTest T1053.005 -TestNumbers 1
+  Invoke-AtomicTest T1053.005 -TestNumbers 1 -Cleanup
+  ```
+* **Splunk SPL Query:** [View Query](detections/T1053_005_scheduled_task.spl)
+* **Analyst Triage & Findings:**
+  * Detected `cmd.exe` spawning `schtasks.exe /create` to establish two persistence mechanisms: one triggered on user logon (`/sc onlogon`) and a high-privilege task running as `SYSTEM` on startup (`/sc onstart /ru system`).
+
+![T1053.005 Detection in Splunk](screenshots/10_t1053_005_detection.png)
