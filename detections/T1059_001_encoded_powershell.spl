@@ -1,0 +1,4 @@
+# MITRE ATT&CK: T1059.001 - PowerShell Encoded Command
+# Data Source: Sysmon (EventCode 1 - Process Creation)
+index=sysmon EventCode=1 Image="*powershell.exe" (CommandLine="*-enc*" OR CommandLine="*-EncodedCommand*" OR CommandLine="* -e *" OR CommandLine="*-w hidden*")
+| table _time, Computer, User, ParentImage, Image, CommandLine
