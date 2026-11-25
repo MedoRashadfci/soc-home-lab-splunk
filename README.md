@@ -7,39 +7,7 @@ A self-hosted, isolated Security Operations Center (SOC) home lab built on VMwar
 ## 1. Lab Architecture & Design
 To optimize host resources (16 GB RAM total), Phase 1 consolidates the SIEM and endpoint telemetry on a single Windows Server 2022 VM (`SOC-LAB-01`), while the Windows 11 host acts as the SOC Analyst workstation accessing Splunk Web remotely.
 
-```text
-+-----------------------------------------------------------------------+
-|  PHYSICAL HOST: Windows 11 (16 GB RAM)                                |
-|  [ Browser: [http://192.168.65.130:8000](http://192.168.65.130:8000) ] <--- SOC Analyst Workstation |
-+-----------------------------------------------------------------------+
-                    |
-                    |  TCP 8000 (Splunk Web)
-                    v
-      =============================
-       VMware Host-Only (VMnet1)      <-- Fully Isolated (No Internet / No LAN)
-      =============================
-                    |
-                    v
-+-----------------------------------------------------------------------+
-|  VM: SOC-LAB-01 (Windows Server 2022 | 6 GB RAM | 2 vCPUs)            |
-|                                                                       |
-|  +-----------------------+          +------------------------------+  |
-|  |   Atomic Red Team     |          |      Windows Telemetry       |  |
-|  |  (Attack Simulation)  | =======> |  - Sysmon (SwiftOnSecurity)  |  |
-|  +-----------------------+          |  - Windows Logs (Sec/Sys)    |  |
-|                                     +------------------------------+  |
-|                                                    |                  |
-|                                                    | Local Collection |
-|                                                    v                  |
-|                                     +------------------------------+  |
-|                                     |      Splunk Enterprise       |  |
-|                                     |  - Indexes: wineventlog,     |  |
-|                                     |    sysmon                    |  |
-|                                     |  - SPL Detections & Alerts   |  |
-|                                     +------------------------------+  |
-+-----------------------------------------------------------------------+
-```
-![VMware Hardware Configuration](screenshots/01_vm_settings.png)
+![VMware Hardware Configuration](screenshots/SOC Lab Architecture.png)
 
 ---
 
