@@ -1,0 +1,4 @@
+# MITRE ATT&CK: T1053.005 - Scheduled Task Persistence
+# Data Source: Sysmon (EventCode 1 - Process Creation)
+index=sysmon EventCode=1 Image="*schtasks.exe" CommandLine="*/create*"
+| table _time, host, User, ParentImage, Image, CommandLine
