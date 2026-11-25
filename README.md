@@ -7,7 +7,7 @@ A self-hosted, isolated Security Operations Center (SOC) home lab built on VMwar
 ## 1. Lab Architecture & Design
 To optimize host resources (16 GB RAM total), Phase 1 consolidates the SIEM and endpoint telemetry on a single Windows Server 2022 VM (`SOC-LAB-01`), while the Windows 11 host acts as the SOC Analyst workstation accessing Splunk Web remotely.
 
-![VMware Hardware Configuration](screenshots/SOC Lab Architecture.png)
+![VMware Hardware Configuration](screenshots/SOC_Lab_Architecture.png)
 
 ---
 
