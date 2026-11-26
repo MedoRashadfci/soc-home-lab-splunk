@@ -210,3 +210,26 @@ Before running any attack simulations, the VM was isolated from the internet and
 To centralize visibility across the lab, I built a Splunk Dashboard that tracks Sysmon ingestion health, Event ID distribution, process creation timelines, and a unified **MITRE ATT&CK Detection Table** mapping all simulated techniques dynamically using SPL `eval/case`.
 
 ![SOC Threat Detection Dashboard](screenshots/11_soc_dashboard.png)
+
+
+### Detection 4: SAM & SYSTEM Registry Credential Dumping (`T1003.002`)
+* **MITRE ATT&CK Tactic:** Credential Access (`T1003.002`)
+* **Data Source:** Sysmon (`Event ID 1` - Process Creation)
+* **Alert Severity:** Critical
+* **Attack Overview & Real-World Scenario:**
+  * Windows stores local user password hashes in the **SAM** registry hive and the boot key required to decrypt them in the **SYSTEM** hive. Because these files are locked while the OS is running, attackers with administrative privileges abuse the native `reg.exe` utility (`Living off the Land`) to dump `HKLM\SAM`, `HKLM\SYSTEM`, and `HKLM\SECURITY` into temporary files.
+  * In real-world intrusions, these hives are exfiltrated to extract NTLM hashes offline (e.g., via `secretsdump.py`) for password cracking or **Pass-the-Hash** lateral movement.
+* **Simulation & Cleanup Commands:**
+  ```powershell
+  Invoke-AtomicTest T1003.002 -TestNumbers 1
+  Invoke-AtomicTest T1003.002 -TestNumbers 1 -Cleanup
+  ```
+* **Splunk SPL Query:** [View Query](detections/T1003_002_sam_dump.spl)
+* **Analyst Triage & Real-World Threat Hunting:**
+  * **Process Analysis:** Verified `cmd.exe` spawning `reg.exe save` targeting sensitive registry hives (`sam`, `system`, `security`) and writing outputs to `%TEMP%`.
+  * **Enterprise Hunting Tips:**
+    * Hunt by `CommandLine` arguments (`save` + `sam`/`system`) regardless of binary name to catch renamed `reg.exe` binaries.
+    * Correlate with **Sysmon Event ID 11 (FileCreate)** for `.save`/`.hiv` files in `%TEMP%` or `C:\Users\Public`, and **Event ID 3 (NetworkConnect)** to detect exfiltration.
+    * Monitor alternative dumping methods such as `vssadmin create shadow` or `esentutl /y`.
+
+![T1003.002 Detection in Splunk](screenshots/12_t1003_002_detection.png)
