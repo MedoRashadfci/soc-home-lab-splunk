@@ -1,0 +1,2 @@
+index=sysmon EventCode=1 (Image="*reg.exe" OR CommandLine="*reg *") CommandLine="*save*" (CommandLine="*sam*" OR CommandLine="*system*" OR CommandLine="*security*")
+| table _time, host, User, ParentImage, Image, CommandLine
