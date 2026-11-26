@@ -198,6 +198,13 @@ Before running any attack simulations, the VM was isolated from the internet and
   Invoke-AtomicTest T1053.005 -TestNumbers 1
   Invoke-AtomicTest T1053.005 -TestNumbers 1 -Cleanup
   ```
+
+  ---
+
+## 8. SOC Monitoring Dashboard
+To centralize visibility across the lab, I built a Splunk Dashboard that tracks Sysmon ingestion health, Event ID distribution, process creation timelines, and a unified **MITRE ATT&CK Detection Table** mapping all simulated techniques dynamically using SPL `eval/case`.
+
+![SOC Threat Detection Dashboard](screenshots/11_soc_dashboard.png)
 * **Splunk SPL Query:** [View Query](detections/T1053_005_scheduled_task.spl)
 * **Analyst Triage & Findings:**
   * Detected `cmd.exe` spawning `schtasks.exe /create` to establish two persistence mechanisms: one triggered on user logon (`/sc onlogon`) and a high-privilege task running as `SYSTEM` on startup (`/sc onstart /ru system`).
