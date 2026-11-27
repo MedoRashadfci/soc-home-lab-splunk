@@ -259,3 +259,24 @@ To centralize visibility across the lab, I built a Splunk Dashboard that tracks 
     * Flag any local account creation on domain-joined workstations or member servers, as legitimate provisioning typically occurs centrally in Active Directory.
 
 ![T1136.001 Detection in Splunk](screenshots/13_t1136_001_detection.png)
+
+### Detection 6: Clearing Windows Event Logs (`T1070.001`)
+* **MITRE ATT&CK Tactic:** Defense Evasion (`T1070.001`)
+* **Data Source:** Sysmon (`Event ID 1` - Process Creation)
+* **Alert Severity:** Critical
+* **Attack Overview & Real-World Scenario:**
+  * Adversaries clear Windows Event Logs using native utilities (`wevtutil.exe cl` or PowerShell `Clear-EventLog`) to destroy forensic evidence and hinder incident response.
+  * Forwarding telemetry in real time to an external SIEM (Splunk) mitigates local tampering because historical events are already preserved off-host and the clearing command triggers a critical alert.
+* **Simulation Command:**
+  ```powershell
+  wevtutil.exe cl Setup
+  ```
+* **Splunk SPL Query:** [View Query](detections/T1070_001_clear_event_logs.spl)
+* **Analyst Triage & Real-World Threat Hunting:**
+  * **Process Analysis:** Detected `wevtutil.exe` executing with the `cl` flag to wipe Windows event logs.
+  * **Enterprise Hunting Tips:**
+    * Monitor native Windows alerts: **Security Event ID 1102** (Audit log cleared) and **System Event ID 104** (Log file cleared).
+    * Hunt for PowerShell equivalents (`Clear-EventLog`, `Remove-EventLog`) and service tampering (`sc stop`, `net stop` targeting Sysmon or SIEM forwarders).
+    * Always pivot backward in SIEM logs prior to the log-clearing timestamp to uncover the preceding intrusion activity.
+
+![T1070.001 Detection in Splunk](screenshots/14_t1070_001_detection.png)
