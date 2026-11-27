@@ -1,0 +1,2 @@
+index=sysmon EventCode=1 ((Image="*wevtutil.exe" (CommandLine="*cl*" OR CommandLine="*clear-log*")) OR (Image="*powershell.exe" CommandLine="*Clear-EventLog*"))
+| table _time, host, User, ParentImage, Image, CommandLine
