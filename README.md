@@ -233,3 +233,29 @@ To centralize visibility across the lab, I built a Splunk Dashboard that tracks 
     * Monitor alternative dumping methods such as `vssadmin create shadow` or `esentutl /y`.
 
 ![T1003.002 Detection in Splunk](screenshots/12_t1003_002_detection.png)
+
+### Detection 5: Local Account Creation for Persistence (`T1136.001`)
+* **MITRE ATT&CK Tactic:** Persistence (`T1136.001`)
+* **Data Source:** Sysmon (`Event ID 1` - Process Creation)
+* **Alert Severity:** High
+* **Attack Overview & Real-World Scenario:**
+  * Attackers often create unauthorized local user accounts and add them to the local `Administrators` or `Remote Desktop Users` groups to maintain stealthy, persistent access without relying on malware.
+  * Using native Windows utilities (`net.exe`, `net1.exe`, or PowerShell `New-LocalUser`), adversaries can log back in legitimately via RDP or SMB, often naming the account something benign (e.g., `svc_backup`) to blend in.
+* **Simulation & Cleanup Commands:**
+  ```powershell
+  # Simulation (via Atomic Red Team Windows test or direct net commands)
+  net user backdoor_user P@ssw0rd123! /add
+  net localgroup administrators backdoor_user /add
+
+  # Cleanup
+  net user backdoor_user /delete
+  ```
+* **Splunk SPL Query:** [View Query](detections/T1136_001_create_local_account.spl)
+* **Analyst Triage & Real-World Threat Hunting:**
+  * **Process Analysis:** Detected **4 Sysmon Event ID 1 entries**—two for account creation and two for local admin group assignment—because Windows automatically spawns `net1.exe` as a child process whenever `net.exe` executes. Including both binaries in the SPL rule prevents evasion if an attacker invokes `net1.exe` directly.
+  * **Enterprise Hunting Tips:**
+    * Correlate Sysmon `Event ID 1` with **Windows Security Event ID 4720** (User Account Created) and **Event ID 4732** (Member Added to Security-Enabled Local Group, especially `Administrators`).
+    * Monitor PowerShell equivalents (`New-LocalUser`, `Add-LocalGroupMember`) via Script Block Logging (`Event ID 4104`).
+    * Flag any local account creation on domain-joined workstations or member servers, as legitimate provisioning typically occurs centrally in Active Directory.
+
+![T1136.001 Detection in Splunk](screenshots/13_t1136_001_detection.png)
